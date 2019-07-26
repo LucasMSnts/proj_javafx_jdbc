@@ -2,17 +2,19 @@ package model.entities;
 
 import java.io.Serializable;
 
-public class Departamento implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
+public class Departamento implements Serializable{
 
+	private static final long serialVersionUID = 1L;
+	
 	private Integer id;
 	private String nome;
 	
 	public Departamento() {
+		
 	}
-
+	
 	public Departamento(Integer id, String nome) {
+		super();
 		this.id = id;
 		this.nome = nome;
 	}
@@ -61,5 +63,5 @@ public class Departamento implements Serializable {
 	@Override
 	public String toString() {
 		return "Departamento [id=" + id + ", nome=" + nome + "]";
-	}
+	}	
 }
