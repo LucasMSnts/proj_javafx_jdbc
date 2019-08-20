@@ -3,17 +3,25 @@ package gui;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import db.DbException;
+import gui.util.Alerts;
 import gui.util.Constraints;
+import gui.util.Utils;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Departamento;
+import model.services.DepartamentoService;
 
 public class DepartamentoFormController implements Initializable{
 
 	private Departamento entity;
+	
+	private DepartamentoService servico;
 	
 	@FXML
 	private TextField txtId;
@@ -34,14 +42,39 @@ public class DepartamentoFormController implements Initializable{
 		this.entity = entity;
 	}
 	
-	@FXML
-	public void onBtSalvarAction() {
-		System.out.println("onBtSalvarAction");
+	public void setDepartamentoService(DepartamentoService servico) {
+		this.servico = servico;
 	}
 	
 	@FXML
-	public void onBtCancelarAction() {
-		System.out.println("onBtCancelarAction");
+	public void onBtSalvarAction(ActionEvent evento) {
+		if (entity == null) {
+			throw new IllegalStateException("Entity esta nula");
+		}
+		if (servico == null) {
+			throw new IllegalStateException("Servico esta nula");
+		}
+		try {
+			entity = getFormData();
+			servico.saveOrUpdate(entity);
+			Utils.currentStage(evento).close();
+		} catch (DbException e) {
+			Alerts.showAlert("Erro salvando objeto", null, e.getMessage(), AlertType.ERROR);
+		}
+	}
+	
+	private Departamento getFormData() {
+		Departamento obj = new Departamento();
+		
+		obj.setId(Utils.tryParseToInt(txtId.getText()));
+		obj.setNome(txtNome.getText());
+		
+		return obj;
+	}
+
+	@FXML
+	public void onBtCancelarAction(ActionEvent evento) {
+		Utils.currentStage(evento).close();
 	}
 	
 	@Override
@@ -56,7 +89,7 @@ public class DepartamentoFormController implements Initializable{
 	
 	public void updateFormData() {
 		if (entity == null) {
-			throw new IllegalStateException("Entity está nula");
+			throw new IllegalStateException("Entity esta nula");
 		}
 		txtId.setText(String.valueOf(entity.getId()));
 		txtNome.setText(entity.getNome());
