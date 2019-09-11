@@ -3,9 +3,11 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import application.Main;
+import db.DbException;
 import gui.listerners.AlteracaoDadosListener;
 import gui.util.Alerts;
 import gui.util.Utils;
@@ -19,6 +21,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -44,6 +47,9 @@ public class DepartamentoListaController implements Initializable, AlteracaoDado
 
 	@FXML
 	private TableColumn<Departamento, Departamento> tableColumnEditar;
+	
+	@FXML
+	private TableColumn<Departamento, Departamento> tableColumnRemover;
 
 	@FXML
 	private Button btNovo;
@@ -82,6 +88,7 @@ public class DepartamentoListaController implements Initializable, AlteracaoDado
 		obsLista = FXCollections.observableArrayList(lista);
 		tableViewDepartamento.setItems(obsLista);
 		initEditButtons();
+		initRemoveButtons();
 	}
 
 	private void createDialogForm(Departamento obj, String absoluteName, Stage parentStage) {
@@ -116,7 +123,28 @@ public class DepartamentoListaController implements Initializable, AlteracaoDado
 	private void initEditButtons() {
 		tableColumnEditar.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 		tableColumnEditar.setCellFactory(param -> new TableCell<Departamento, Departamento>() {
-			private final Button button = new Button("editar");
+			private final Button button = new Button("Editar");
+
+			@Override
+			protected void updateItem(Departamento obj, boolean empty) {
+				super.updateItem(obj, empty);
+
+				if (obj == null) {
+					setGraphic(null);
+					return;
+				}
+
+				setGraphic(button);
+				button.setOnAction(
+						event -> createDialogForm(obj, "/gui/DepartamentoForm.fxml", Utils.currentStage(event)));
+			}
+		});
+	}
+
+	private void initRemoveButtons() {
+		tableColumnRemover.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		tableColumnRemover.setCellFactory(param -> new TableCell<Departamento, Departamento>() {
+			private final Button button = new Button("Remover");
 
 			@Override
 			protected void updateItem(Departamento obj, boolean empty) {
@@ -128,9 +156,25 @@ public class DepartamentoListaController implements Initializable, AlteracaoDado
 				}
 				
 				setGraphic(button);
-				button.setOnAction(
-						event -> createDialogForm(obj, "/gui/DepartamentoForm.fxml", Utils.currentStage(event)));
-			}
+				button.setOnAction(event -> removeEntity(obj));
+			}			
 		});
+	}
+	
+	private void removeEntity(Departamento obj) {
+		Optional<ButtonType> result = Alerts.showConfirmation("Confirmação", "Tem certeza que quer deletar?");
+		
+		if (result.get() == ButtonType.OK) {
+			if (servico == null) {
+				throw new IllegalStateException("Serviço estava Nulo");
+			}
+			try {
+				servico.remove(obj);
+				updateTableView();
+			}
+			catch (DbException e) {
+				Alerts.showAlert("Erro removendo objeto", null, e.getMessage(), AlertType.ERROR);
+			}
+		}
 	}
 }
