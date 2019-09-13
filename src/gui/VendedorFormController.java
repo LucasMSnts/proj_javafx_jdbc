@@ -1,6 +1,8 @@
 package gui;
 
 import java.net.URL;
+import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -126,14 +128,38 @@ public class VendedorFormController implements Initializable {
 		Vendedor obj = new Vendedor();
 
 		ValidacaoException excecao = new ValidacaoException("Erro de Validação");
-
+		//Nome
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
 
+		//Nome
 		if (txtNome.getText() == null || txtNome.getText().trim().equals("")) {
 			excecao.addErro("Nome", "Campo não pode estar vazio");
 		}
 		obj.setNome(txtNome.getText());
 
+		//Email
+		if (txtEmail.getText() == null || txtEmail.getText().trim().equals("")) {
+			excecao.addErro("Email", "Campo não pode estar vazio");
+		}
+		obj.setEmail(txtEmail.getText());
+		
+		//Data Nascimento
+		if (dpDataNasc.getValue() == null) {
+			excecao.addErro("DataNasc", "Campo não pode estar vazio");
+		} else {
+			Instant instant = Instant.from(dpDataNasc.getValue().atStartOfDay(ZoneId.systemDefault()));
+			obj.setDataNasc(Date.from(instant));
+		}
+		
+		//Base Salarial
+		if (txtBaseSalarial.getText() == null || txtBaseSalarial.getText().trim().equals("")) {
+			excecao.addErro("BaseSalarial", "Campo não pode estar vazio");
+		}
+		obj.setBaseSalario(Utils.tryParseToDouble(txtBaseSalarial.getText()));
+		
+		//Departamento
+		obj.setDepartamento(comboBoxDepartamento.getValue());
+		
 		if (excecao.getErros().size() > 0) {
 			throw excecao;
 		}
@@ -196,9 +222,14 @@ public class VendedorFormController implements Initializable {
 	private void setErroMensagens(Map<String, String> erros) {
 		Set<String> campos = erros.keySet();
 
-		if (campos.contains("Nome")) {
-			labelErroNome.setText(erros.get("Nome"));
-		}
+		labelErroNome.setText((campos.contains("Nome") ? erros.get("Nome") : ""));
+		
+		labelErroEmail.setText((campos.contains("Email") ? erros.get("Email") : ""));
+		
+		labelErroDataNasc.setText((campos.contains("DataNasc") ? erros.get("DataNasc") : ""));
+		
+		labelErroBaseSalarial.setText((campos.contains("BaseSalarial") ? erros.get("BaseSalarial") : ""));
+					
 	}
 
 	private void initializeComboBoxDepartment() {
