@@ -1,7 +1,7 @@
 package gui;
 
 import java.net.URL;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -155,7 +155,9 @@ public class VendedorFormController implements Initializable{
 		Locale.setDefault(Locale.US);
 		txtBaseSalarial.setText(String.format("%.2f", entity.getBaseSalario()));
 		if (entity.getDataNasc() != null) {
-	//		dpDataNasc.setValue(LocalDate.ofInstant(entity.getDataNasc().toInstant(), ZoneId.systemDefault()));
+			// JAVA SE 9
+			//dpDataNasc.setValue(LocalDate.ofInstant(entity.getDataNasc().toInstant(), ZoneId.systemDefault()));
+			dpDataNasc.setValue(LocalDateTime.ofInstant(entity.getDataNasc().toInstant(), ZoneId.systemDefault()).toLocalDate());
 		}
 	}
 	
